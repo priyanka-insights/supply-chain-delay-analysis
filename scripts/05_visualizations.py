@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-BASE = "C:/Users/prianka/OneDrive/Desktop/supply-chain-delay-analysis/"
+BASE = Path(__file__).resolve().parent.parent
 os.makedirs(BASE + "charts", exist_ok=True)
 
 df = pd.read_csv(BASE + "data/processed/master_table_features.csv")

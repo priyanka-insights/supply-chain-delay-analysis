@@ -1,8 +1,9 @@
 import pandas as pd
+from pathlib import Path
 
-BASE = "C:/Users/prianka/OneDrive/Desktop/supply-chain-delay-analysis/"
+BASE = Path(__file__).resolve().parent.parent
 
-master = pd.read_csv(BASE + "data/processed/master_table.csv", parse_dates=[
+master = pd.read_csv(BASE / "data/processed/master_table.csv", parse_dates=[
     "order_purchase_timestamp", "order_delivered_customer_date", "order_estimated_delivery_date"
 ])
 
@@ -45,5 +46,5 @@ print(f"\nDelay bucket counts:")
 print(master["delay_bucket"].value_counts().to_string())
 print(f"\nTotal estimated penalty exposure: R$ {master['penalty_cost'].sum():,.2f}")
 
-master.to_csv(BASE + "data/processed/master_table_features.csv", index=False)
+master.to_csv(BASE / "data/processed/master_table_features.csv", index=False)
 print("\nSaved: data/processed/master_table_features.csv")

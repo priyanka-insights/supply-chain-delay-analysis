@@ -155,9 +155,7 @@ Some states have very few orders on the seller side (Amazonas had only 3). Any s
 **Priyanka Chaudhary**
 Data Analyst | Python, SQL
 
-[LinkedIn](your-linkedin-url-here)
-[GitHub](your-github-url-here)
-
+[LinkedIn](https://www.linkedin.com/in/priyanka-chaudhary775/) · [GitHub](https://github.com/priyanka-insights)
 ---
 
 ## License

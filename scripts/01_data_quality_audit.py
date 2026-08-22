@@ -1,50 +1,49 @@
 import pandas as pd
-from pathlib import Path
 
-BASE = Path(__file__).resolve().parent.parent
+BASE = "../data/raw/"
 
-master = pd.read_csv(BASE / "data/processed/master_table.csv", parse_dates=[
-    "order_purchase_timestamp", "order_delivered_customer_date", "order_estimated_delivery_date"
-])
+orders = pd.read_csv(BASE + "olist_orders_dataset.csv")
+items = pd.read_csv(BASE + "olist_order_items_dataset.csv")
+reviews = pd.read_csv(BASE + "olist_order_reviews_dataset.csv")
 
-# delay_days: actual delivery date minus promised date. Positive = late.
-master["delay_days"] = (master["order_delivered_customer_date"] - master["order_estimated_delivery_date"]).dt.days
+# Check 1: is order_id one-to-many between orders and order_items?
+orders_count = orders["order_id"].nunique()
+items_orders_count = items["order_id"].nunique()
+items_per_order = items.groupby("order_id").size()
 
-# is_delayed: binary flag used for rate calculations and hypothesis tests
-master["is_delayed"] = (master["delay_days"] > 0).astype(int)
+print("Check 1: order_items cardinality")
+print(f"  Unique orders in orders table: {orders_count}")
+print(f"  Unique orders in items table: {items_orders_count}")
+print(f"  Avg items per order: {items_per_order.mean():.2f}")
+print(f"  Orders with more than 1 item: {(items_per_order > 1).sum()} ({(items_per_order > 1).mean()*100:.1f}%)")
 
-# delay_bucket: groups delay_days into readable ranges
-def bucket_delay(days):
-    if days <= 0:
-        return "on_time"
-    elif days <= 3:
-        return "1-3_days_late"
-    elif days <= 7:
-        return "4-7_days_late"
-    else:
-        return "8plus_days_late"
+# Check 2: duplicate order_id in reviews table
+duplicate_order_reviews = reviews["order_id"].duplicated().sum()
 
-master["delay_bucket"] = master["delay_days"].apply(bucket_delay)
+print("\nCheck 2: duplicate reviews")
+print(f"  Total review rows: {len(reviews)}")
+print(f"  Duplicate order_id count: {duplicate_order_reviews}")
 
-# purchase_month: used for trend chart, excludes the Sep-Oct 2018 data cutoff
-master["purchase_month"] = master["order_purchase_timestamp"].dt.to_period("M").astype(str)
+# Check 3: monthly order volume — Olist data has a known Sep-Oct 2018 cutoff
+orders["order_purchase_timestamp"] = pd.to_datetime(orders["order_purchase_timestamp"])
+monthly_orders = orders.groupby(orders["order_purchase_timestamp"].dt.to_period("M")).size()
 
-# is_festive_season: Nov-Dec flag, based on purchase date
-master["is_festive_season"] = master["order_purchase_timestamp"].dt.month.isin([11, 12]).astype(int)
+print("\nCheck 3: monthly order count (last 6 months)")
+print(monthly_orders.tail(6).to_string())
 
-# delivery_duration_days: absolute purchase-to-delivery time (different from delay_days)
-master["delivery_duration_days"] = (master["order_delivered_customer_date"] - master["order_purchase_timestamp"]).dt.days
+# Check 4: 'delivered' status orders missing delivery date
+delivered_orders = orders[orders["order_status"] == "delivered"]
+missing_date_count = delivered_orders["order_delivered_customer_date"].isnull().sum()
 
-# order_value_total: base value used for penalty_cost
-master["order_value_total"] = master["total_price"] + master["total_freight"]
+print("\nCheck 4: delivered orders missing delivery date")
+print(f"  Total delivered orders: {len(delivered_orders)}")
+print(f"  Missing delivery date: {missing_date_count}")
 
-# penalty_cost: modeling assumption (10% of order value) — no real SLA penalty data exists
-master["penalty_cost"] = master["order_value_total"] * 0.10 * master["is_delayed"]
+# Check 5: delivered orders missing estimated delivery date
+# (needed because delay_days = delivered_date - estimated_date; a missing
+# estimated date would silently produce NaN and get miscounted as on-time)
+missing_estimated_count = delivered_orders["order_estimated_delivery_date"].isnull().sum()
 
-print(f"Overall delay rate: {master['is_delayed'].mean()*100:.2f}%")
-print(f"\nDelay bucket counts:")
-print(master["delay_bucket"].value_counts().to_string())
-print(f"\nTotal estimated penalty exposure: R$ {master['penalty_cost'].sum():,.2f}")
-
-master.to_csv(BASE / "data/processed/master_table_features.csv", index=False)
-print("\nSaved: data/processed/master_table_features.csv")
+print("\nCheck 5: delivered orders missing estimated delivery date")
+print(f"  Total delivered orders: {len(delivered_orders)}")
+print(f"  Missing estimated delivery date: {missing_estimated_count}")

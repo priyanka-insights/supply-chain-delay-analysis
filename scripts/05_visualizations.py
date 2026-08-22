@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-BASE = Path(__file__).resolve().parent.parent
+BASE = "../"
 os.makedirs(BASE + "charts", exist_ok=True)
 
 df = pd.read_csv(BASE + "data/processed/master_table_features.csv")
@@ -18,8 +18,7 @@ plt.xlabel("Customer State")
 plt.ylabel("Delay Rate (%)")
 plt.legend()
 plt.tight_layout()
-plt.savefig("charts/delay_rate_by_state.png")
-plt.show()
+plt.savefig(BASE + "charts/delay_rate_by_state.png")
 
 
 # ---------- Chart 2: Monthly delay trend ----------
@@ -35,7 +34,6 @@ plt.xlabel("Month")
 plt.ylabel("Delay Rate (%)")
 plt.tight_layout()
 plt.savefig(BASE + "charts/monthly_delay_trend.png")
-plt.show()
 
 # ---------- Chart 3: Review score by delay bucket ----------
 order = ["on_time", "1-3_days_late", "4-7_days_late", "8plus_days_late"]
@@ -48,7 +46,6 @@ plt.xlabel("Delay Bucket")
 plt.ylabel("Avg Review Score")
 plt.tight_layout()
 plt.savefig(BASE + "charts/review_score_by_delay.png")
-plt.show()
 
 # ---------- Chart 4: Financial exposure by state ----------
 exposure = df.groupby("customer_state")["penalty_cost"].sum().sort_values(ascending=False).head(10)
@@ -60,7 +57,6 @@ plt.xlabel("Customer State")
 plt.ylabel("Total Penalty Cost (R$)")
 plt.tight_layout()
 plt.savefig(BASE + "charts/penalty_exposure_by_state.png")
-plt.show()
 
 
 # ---------- Chart 5: Seller state vs Customer state delay rate ----------
@@ -82,4 +78,3 @@ axes[1].set_ylabel("Delay Rate (%)")
 
 plt.tight_layout()
 plt.savefig(BASE + "charts/seller_vs_customer_delay.png")
-plt.show()

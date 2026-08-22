@@ -1,13 +1,12 @@
 import pandas as pd
-from pathlib import Path
 
-BASE = Path(__file__).resolve().parent.parent
+BASE = "../"
 
-orders = pd.read_csv(BASE / "data/raw/olist_orders_dataset.csv")
-items = pd.read_csv(BASE / "data/raw/olist_order_items_dataset.csv")
-reviews = pd.read_csv(BASE / "data/raw/olist_order_reviews_dataset.csv")
-customers = pd.read_csv(BASE / "data/raw/olist_customers_dataset.csv")
-sellers = pd.read_csv(BASE / "data/raw/olist_sellers_dataset.csv")
+orders = pd.read_csv(BASE + "data/raw/olist_orders_dataset.csv")
+items = pd.read_csv(BASE + "data/raw/olist_order_items_dataset.csv")
+reviews = pd.read_csv(BASE + "data/raw/olist_order_reviews_dataset.csv")
+customers = pd.read_csv(BASE + "data/raw/olist_customers_dataset.csv")
+sellers = pd.read_csv(BASE + "data/raw/olist_sellers_dataset.csv")
 
 # Step 1: keep only delivered orders that have a delivery date
 delivered = orders[orders["order_status"] == "delivered"].copy()
@@ -45,5 +44,5 @@ for col in date_cols:
 print(f"Step 4: master table shape = {master.shape}")
 print(f"  Missing review_score: {master['review_score'].isnull().sum()}")
 
-master.to_csv(BASE / "data/processed/master_table.csv", index=False)
+master.to_csv(BASE + "data/processed/master_table.csv", index=False)
 print("\nSaved: data/processed/master_table.csv")

@@ -1,10 +1,9 @@
 import pandas as pd
-from pathlib import Path
 from scipy import stats
 
-BASE = Path(__file__).resolve().parent.parent
+BASE = "../"
 
-df = pd.read_csv(BASE / "data/processed/master_table_features.csv")
+df = pd.read_csv(BASE + "data/processed/master_table_features.csv")
 
 # H1: does delay rate genuinely vary by customer state? (chi-square)
 table_h1 = pd.crosstab(df["customer_state"], df["is_delayed"])
